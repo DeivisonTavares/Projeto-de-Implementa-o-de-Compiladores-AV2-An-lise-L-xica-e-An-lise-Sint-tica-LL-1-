@@ -1,4 +1,4 @@
-Script started on 2025-12-09 19:36:01-03:00 [TERM="xterm-256color" TTY="/dev/pts/1" COLUMNS="106" LINES="12"]
+Script started on 2025-12-10 09:16:16-03:00 [TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="106" LINES="9"]
 === Tabela de Tokens ===
 Lexema          Classe             Linha  Col   
 -------------------------------------------------------------
@@ -20,6 +20,19 @@ x               IDENTIFIER         3      3
 === Cadeia de Tokens ===
 MAIN         LEFT_BRACE   VAR          IDENTIFIER   COLON        INT          EQUAL        NUMBER       
 SEMICOLON    IDENTIFIER   EQUAL        NUMBER       SEMICOLON    RIGHT_BRACE  EOF          
+
+=== Expressões Regulares Utilizadas (Lexer) ===
+IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*
+NUMBER:     [0-9]+ | [0-9]+\.[0-9]+ | [0-9]+\.[0-9]+[dD]
+STRING:     "[^"]*"
+CHAR:       '[a-zA-Z0-9]'
+OPERATORS:  +, -, *, /, %, ==, !=, <, >, <=, >=, =, +=, -=, *=, /=, %=
+LOGICAL:    &&, ||, !
+KEYWORDS:   var, int, float, double, char, bool, string, true, false,
+            if, else, while, do, for, switch, case, default, break,
+            continue, print, input, return, main
+DELIMITERS: { } [ ] ( ) , . ; : ?
+COMMENTS:   // ... (linha)  e  /* ... */ (bloco)
 
 ✅ Parser Recursivo: Programa reconhecido sem erros.
 === Árvore (impressão simplificada) ===
@@ -49,40 +62,46 @@ O Parser Recursivo acima reconheceu o programa com sucesso.
 FIRST(Condition) = [(]
 FIRST(LogicalOpTail) = [&&, ||, ε]
 FIRST(Program) = [main]
-FIRST(Statement) = [print, NUMBER, var, (, IDENTIFIER, while, if, return]
+FIRST(Statement) = [print, NUMBER, var, for, (, do, IDENTIFIER, while, if, return]
 FIRST(ElseOpt) = [ε, else]
 FIRST(LogicalOp) = [&&, ||]
 FIRST(IdentRest) = [==, <=, *, +, ;, !=, <, =, -, >, /, >=]
 FIRST(Term) = [NUMBER, (, STRING, IDENTIFIER]
 FIRST(TermP) = [ε, *, /]
+FIRST(ForCond) = [ε, (]
 FIRST(VarInit) = [;, =]
 FIRST(Type) = [string, float, int]
 FIRST(Expr) = [NUMBER, (, STRING, IDENTIFIER]
 FIRST(CompOp) = [==, <=, !=, <, >, >=]
 FIRST(Factor) = [NUMBER, (, STRING, IDENTIFIER]
 FIRST(Block) = [{]
-FIRST(StmtList) = [print, NUMBER, ε, var, (, IDENTIFIER, while, if, return]
+FIRST(ForStep) = [NUMBER, ε, (, STRING, IDENTIFIER]
+FIRST(StmtList) = [print, NUMBER, ε, var, for, (, do, IDENTIFIER, while, if, return]
 FIRST(LogicalExpr) = [NUMBER, (, STRING, IDENTIFIER]
+FIRST(ForInit) = [ε, var, IDENTIFIER]
 FIRST(ExprP) = [==, <=, ε, +, !=, <, -, >, >=]
 
 === Conjuntos FOLLOW ===
-FOLLOW(Condition) = [{]
+FOLLOW(Condition) = [{, ;]
 FOLLOW(LogicalOpTail) = [)]
 FOLLOW(Program) = [EOF]
-FOLLOW(Statement) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
-FOLLOW(ElseOpt) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
+FOLLOW(Statement) = [print, NUMBER, var, for, (, do, IDENTIFIER, while, if, }, return]
+FOLLOW(ElseOpt) = [print, NUMBER, var, for, (, do, IDENTIFIER, while, if, }, return]
 FOLLOW(LogicalOp) = [NUMBER, (, STRING, IDENTIFIER]
-FOLLOW(IdentRest) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
+FOLLOW(IdentRest) = [NUMBER, var, (, for, ), do, while, print, STRING, IDENTIFIER, if, }, return]
 FOLLOW(Term) = [==, &&, ||, <=, ), +, -, ;, !=, <, >, >=]
 FOLLOW(TermP) = [==, &&, ||, <=, ), +, ;, !=, <, -, >, >=]
-FOLLOW(VarInit) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
+FOLLOW(ForCond) = [NUMBER, (, STRING, ), IDENTIFIER]
+FOLLOW(VarInit) = [NUMBER, var, (, for, ), do, while, print, STRING, IDENTIFIER, if, }, return]
 FOLLOW(Type) = [;, =]
 FOLLOW(Expr) = [&&, ||, ), ;]
 FOLLOW(CompOp) = [NUMBER, (, STRING, IDENTIFIER]
 FOLLOW(Factor) = [==, &&, ||, <=, ), *, +, -, /, ;, !=, <, >, >=]
-FOLLOW(Block) = [print, NUMBER, else, var, (, IDENTIFIER, while, EOF, if, }, return]
+FOLLOW(Block) = [NUMBER, var, for, (, do, while, print, else, IDENTIFIER, EOF, if, }, return]
+FOLLOW(ForStep) = [)]
 FOLLOW(StmtList) = [}]
 FOLLOW(LogicalExpr) = [)]
+FOLLOW(ForInit) = [NUMBER, (, STRING, ), IDENTIFIER]
 FOLLOW(ExprP) = [&&, ||, ), ;]
 
 === Tabela de Análise LL(1) ===
@@ -103,7 +122,9 @@ Para Statement:
   M[Statement, print] = [print, Expr, ;]
   M[Statement, NUMBER] = [NUMBER, TermP, ExprP, ;]
   M[Statement, var] = [var, IDENTIFIER, :, Type, VarInit]
+  M[Statement, for] = [for, (, ForInit, ForCond, ForStep, ), Block]
   M[Statement, (] = [(, Expr, ), TermP, ExprP, ;]
+  M[Statement, do] = [do, Block, while, Condition, ;]
   M[Statement, IDENTIFIER] = [IDENTIFIER, IdentRest]
   M[Statement, while] = [while, Condition, Block]
   M[Statement, if] = [if, Condition, Block, ElseOpt]
@@ -114,7 +135,9 @@ Para ElseOpt:
   M[ElseOpt, NUMBER] = [ε]
   M[ElseOpt, else] = [else, Block]
   M[ElseOpt, var] = [ε]
+  M[ElseOpt, for] = [ε]
   M[ElseOpt, (] = [ε]
+  M[ElseOpt, do] = [ε]
   M[ElseOpt, IDENTIFIER] = [ε]
   M[ElseOpt, while] = [ε]
   M[ElseOpt, if] = [ε]
@@ -161,6 +184,13 @@ Para TermP:
   M[TermP, >] = [ε]
   M[TermP, >=] = [ε]
 
+Para ForCond:
+  M[ForCond, NUMBER] = [ε]
+  M[ForCond, (] = [Condition, ;]
+  M[ForCond, STRING] = [ε]
+  M[ForCond, )] = [ε]
+  M[ForCond, IDENTIFIER] = [ε]
+
 Para VarInit:
   M[VarInit, ;] = [;]
   M[VarInit, =] = [=, Expr, ;]
@@ -193,11 +223,20 @@ Para Factor:
 Para Block:
   M[Block, {] = [{, StmtList, }]
 
+Para ForStep:
+  M[ForStep, NUMBER] = [Expr]
+  M[ForStep, (] = [Expr]
+  M[ForStep, STRING] = [Expr]
+  M[ForStep, )] = [ε]
+  M[ForStep, IDENTIFIER] = [Expr]
+
 Para StmtList:
   M[StmtList, print] = [Statement, StmtList]
   M[StmtList, NUMBER] = [Statement, StmtList]
   M[StmtList, var] = [Statement, StmtList]
+  M[StmtList, for] = [Statement, StmtList]
   M[StmtList, (] = [Statement, StmtList]
+  M[StmtList, do] = [Statement, StmtList]
   M[StmtList, IDENTIFIER] = [Statement, StmtList]
   M[StmtList, while] = [Statement, StmtList]
   M[StmtList, if] = [Statement, StmtList]
@@ -209,6 +248,14 @@ Para LogicalExpr:
   M[LogicalExpr, (] = [Expr, LogicalOpTail]
   M[LogicalExpr, STRING] = [Expr, LogicalOpTail]
   M[LogicalExpr, IDENTIFIER] = [Expr, LogicalOpTail]
+
+Para ForInit:
+  M[ForInit, NUMBER] = [ε]
+  M[ForInit, var] = [var, IDENTIFIER, :, Type, VarInit]
+  M[ForInit, (] = [ε]
+  M[ForInit, STRING] = [ε]
+  M[ForInit, )] = [ε]
+  M[ForInit, IDENTIFIER] = [IDENTIFIER, IdentRest]
 
 Para ExprP:
   M[ExprP, ==] = [CompOp, Term, ExprP]
@@ -223,6 +270,10 @@ Para ExprP:
   M[ExprP, -] = [-, Term, ExprP]
   M[ExprP, >] = [CompOp, Term, ExprP]
   M[ExprP, >=] = [CompOp, Term, ExprP]
+
+=== Conflitos detectados durante a construção da tabela ===
+IGNORADO (eps vs nao-eps): M[ForCond, (] manter [Condition, ;] (ignorando [ε])
+IGNORADO (eps vs nao-eps): M[ForInit, IDENTIFIER] manter [IDENTIFIER, IdentRest] (ignorando [ε])
 
 ============================================================
 TESTE COM TOKENS DO LEXER
@@ -416,4 +467,4 @@ Passo 36:
 
 ✅ Análise LL(1) com Pilha: ACEITA entrada lida
 
-Script done on 2025-12-09 19:36:01-03:00 [COMMAND_EXIT_CODE="0"]
+Script done on 2025-12-10 09:16:16-03:00 [COMMAND_EXIT_CODE="0"]

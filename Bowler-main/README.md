@@ -6,12 +6,31 @@
 
 ### Compilar
 ```bash
-javac -d bin src/*.java
+javac -d bin src/*.java  
 ```
 
 ### Executar um teste
 ```bash
-java -cp bin Bowler src/teste_string.bw
+java -cp bin Bowler src/teste_atribuicao.bw
+```
+
+### Gerar o txt
+```bash
+cd trabalho_compiladores/java
+# compilar (somente se necessário)
+javac -d bin src/*.java
+
+# sobrescrever o arquivo de saída (limpa antes)
+java -cp bin Bowler src/teste_atribuicao.bw > PROJETO_OUTPUT_teste_atribuicao.txt 2>&1
+
+# ou anexar ao arquivo (mantém histórico)
+java -cp bin Bowler src/teste_atribuicao.bw >> PROJETO_OUTPUT_teste_atribuicao.txt 2>&1
+
+# ou ver no terminal e gravar ao mesmo tempo
+java -cp bin Bowler src/teste_atribuicao.bw 2>&1 | tee PROJETO_OUTPUT_teste_atribuicao.txt
+
+# ou capturar a sessão completa (inclui controle de terminal)
+script -q -c "java -cp bin Bowler src/teste_atribuicao.bw" PROJETO_OUTPUT_teste_atribuicao.txt
 ```
 
 ### Saída esperada
