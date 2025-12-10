@@ -1,0 +1,1295 @@
+Script started on 2025-12-09 19:37:34-03:00 [TERM="xterm-256color" TTY="/dev/pts/1" COLUMNS="106" LINES="12"]
+=== Tabela de Tokens ===
+Lexema          Classe             Linha  Col   
+-------------------------------------------------------------
+main            MAIN               1      1     
+{               LEFT_BRACE         1      6     
+var             VAR                2      3     
+x               IDENTIFIER         2      7     
+:               COLON              2      8     
+int             INT                2      10    
+=               EQUAL              2      14    
+10              NUMBER             2      16    
+;               SEMICOLON          2      18    
+var             VAR                3      3     
+y               IDENTIFIER         3      7     
+:               COLON              3      8     
+int             INT                3      10    
+=               EQUAL              3      14    
+2               NUMBER             3      16    
+;               SEMICOLON          3      17    
+var             VAR                4      3     
+msg             IDENTIFIER         4      7     
+:               COLON              4      10    
+string          STRING_KW          4      12    
+=               EQUAL              4      19    
+"hello"         STRING             4      21    
+;               SEMICOLON          4      28    
+if              IF                 5      3     
+(               LEFT_PAREN         5      6     
+x               IDENTIFIER         5      7     
+>               GREATER            5      9     
+y               IDENTIFIER         5      11    
+&&              AND_AND            5      13    
+y               IDENTIFIER         5      16    
+!=              BANG_EQUAL         5      18    
+0               NUMBER             5      21    
+)               RIGHT_PAREN        5      22    
+{               LEFT_BRACE         5      24    
+x               IDENTIFIER         6      6     
+=               EQUAL              6      8     
+x               IDENTIFIER         6      10    
++               PLUS               6      12    
+y               IDENTIFIER         6      14    
+*               STAR               6      16    
+3               NUMBER             6      18    
+;               SEMICOLON          6      19    
+}               RIGHT_BRACE        7      3     
+else            ELSE               7      5     
+{               LEFT_BRACE         7      10    
+x               IDENTIFIER         8      6     
+=               EQUAL              8      8     
+0               NUMBER             8      10    
+;               SEMICOLON          8      11    
+}               RIGHT_BRACE        9      3     
+while           WHILE              10     3     
+(               LEFT_PAREN         10     9     
+x               IDENTIFIER         10     10    
+>               GREATER            10     12    
+0               NUMBER             10     14    
+)               RIGHT_PAREN        10     15    
+{               LEFT_BRACE         10     17    
+x               IDENTIFIER         11     6     
+=               EQUAL              11     8     
+x               IDENTIFIER         11     10    
+-               MINUS              11     12    
+1               NUMBER             11     14    
+;               SEMICOLON          11     15    
+}               RIGHT_BRACE        12     3     
+return          RETURN             13     3     
+x               IDENTIFIER         13     10    
+;               SEMICOLON          13     11    
+}               RIGHT_BRACE        14     1     
+<EOF>           EOF                15     1     
+=== Cadeia de Tokens ===
+MAIN         LEFT_BRACE   VAR          IDENTIFIER   COLON        INT          EQUAL        NUMBER       
+SEMICOLON    VAR          IDENTIFIER   COLON        INT          EQUAL        NUMBER       SEMICOLON    
+VAR          IDENTIFIER   COLON        STRING_KW    EQUAL        STRING       SEMICOLON    IF           
+LEFT_PAREN   IDENTIFIER   GREATER      IDENTIFIER   AND_AND      IDENTIFIER   BANG_EQUAL   NUMBER       
+RIGHT_PAREN  LEFT_BRACE   IDENTIFIER   EQUAL        IDENTIFIER   PLUS         IDENTIFIER   STAR         
+NUMBER       SEMICOLON    RIGHT_BRACE  ELSE         LEFT_BRACE   IDENTIFIER   EQUAL        NUMBER       
+SEMICOLON    RIGHT_BRACE  WHILE        LEFT_PAREN   IDENTIFIER   GREATER      NUMBER       RIGHT_PAREN  
+LEFT_BRACE   IDENTIFIER   EQUAL        IDENTIFIER   MINUS        NUMBER       SEMICOLON    RIGHT_BRACE  
+RETURN       IDENTIFIER   SEMICOLON    RIGHT_BRACE  EOF          
+
+✅ Parser Recursivo: Programa reconhecido sem erros.
+=== Árvore (impressão simplificada) ===
+Program
+  main:
+    Block {
+      VarDecl x:
+        Type(int)
+        init:
+          Literal(10)
+      VarDecl y:
+        Type(int)
+        init:
+          Literal(2)
+      VarDecl msg:
+        Type(string)
+        init:
+          Literal(hello)
+      If
+        cond:
+          Binary AND_AND
+            Binary GREATER
+              Var(x)
+              Var(y)
+            Binary BANG_EQUAL
+              Var(y)
+              Literal(0)
+        then:
+          Block {
+            ExprStmt
+              Assign x
+                Binary PLUS
+                  Var(x)
+                  Binary STAR
+                    Var(y)
+                    Literal(3)
+          }
+        else:
+          Block {
+            ExprStmt
+              Assign x
+                Literal(0)
+          }
+      While
+        cond:
+          Binary GREATER
+            Var(x)
+            Literal(0)
+        body:
+          Block {
+            ExprStmt
+              Assign x
+                Binary MINUS
+                  Var(x)
+                  Literal(1)
+          }
+      Return
+        Var(x)
+    }
+=== Árvore (detalhada) ===
+Program(main:Block[VarDecl(name:x, type:int, init:Literal(10)), VarDecl(name:y, type:int, init:Literal(2)), VarDecl(name:msg, type:string, init:Literal(hello)), If(cond:Binary(Binary(Var(x), GREATER, Var(y)), AND_AND, Binary(Var(y), BANG_EQUAL, Literal(0))), then:Block[ExprStmt(Assign(x, Binary(Var(x), PLUS, Binary(Var(y), STAR, Literal(3)))))], else:Block[ExprStmt(Assign(x, Literal(0)))]), While(cond:Binary(Var(x), GREATER, Literal(0)), body:Block[ExprStmt(Assign(x, Binary(Var(x), MINUS, Literal(1))))]), Return(Var(x))])
+
+============================================================
+ANÁLISE LL(1) COM PILHA - GRAMÁTICA SIMPLIFICADA
+============================================================
+
+Nota: A gramática LL(1) simplificada foi definida para
+validar a estrutura básica do programa Bowler.
+O Parser Recursivo acima reconheceu o programa com sucesso.
+
+=== Conjuntos FIRST ===
+FIRST(Condition) = [(]
+FIRST(LogicalOpTail) = [&&, ||, ε]
+FIRST(Program) = [main]
+FIRST(Statement) = [print, NUMBER, var, (, IDENTIFIER, while, if, return]
+FIRST(ElseOpt) = [ε, else]
+FIRST(LogicalOp) = [&&, ||]
+FIRST(IdentRest) = [==, <=, *, +, ;, !=, <, =, -, >, /, >=]
+FIRST(Term) = [NUMBER, (, STRING, IDENTIFIER]
+FIRST(TermP) = [ε, *, /]
+FIRST(VarInit) = [;, =]
+FIRST(Type) = [string, float, int]
+FIRST(Expr) = [NUMBER, (, STRING, IDENTIFIER]
+FIRST(CompOp) = [==, <=, !=, <, >, >=]
+FIRST(Factor) = [NUMBER, (, STRING, IDENTIFIER]
+FIRST(Block) = [{]
+FIRST(StmtList) = [print, NUMBER, ε, var, (, IDENTIFIER, while, if, return]
+FIRST(LogicalExpr) = [NUMBER, (, STRING, IDENTIFIER]
+FIRST(ExprP) = [==, <=, ε, +, !=, <, -, >, >=]
+
+=== Conjuntos FOLLOW ===
+FOLLOW(Condition) = [{]
+FOLLOW(LogicalOpTail) = [)]
+FOLLOW(Program) = [EOF]
+FOLLOW(Statement) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
+FOLLOW(ElseOpt) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
+FOLLOW(LogicalOp) = [NUMBER, (, STRING, IDENTIFIER]
+FOLLOW(IdentRest) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
+FOLLOW(Term) = [==, &&, ||, <=, ), +, -, ;, !=, <, >, >=]
+FOLLOW(TermP) = [==, &&, ||, <=, ), +, ;, !=, <, -, >, >=]
+FOLLOW(VarInit) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
+FOLLOW(Type) = [;, =]
+FOLLOW(Expr) = [&&, ||, ), ;]
+FOLLOW(CompOp) = [NUMBER, (, STRING, IDENTIFIER]
+FOLLOW(Factor) = [==, &&, ||, <=, ), *, +, -, /, ;, !=, <, >, >=]
+FOLLOW(Block) = [print, NUMBER, else, var, (, IDENTIFIER, while, EOF, if, }, return]
+FOLLOW(StmtList) = [}]
+FOLLOW(LogicalExpr) = [)]
+FOLLOW(ExprP) = [&&, ||, ), ;]
+
+=== Tabela de Análise LL(1) ===
+M[A, a] = Produção
+
+Para Condition:
+  M[Condition, (] = [(, LogicalExpr, )]
+
+Para LogicalOpTail:
+  M[LogicalOpTail, &&] = [LogicalOp, Expr, LogicalOpTail]
+  M[LogicalOpTail, ||] = [LogicalOp, Expr, LogicalOpTail]
+  M[LogicalOpTail, )] = [ε]
+
+Para Program:
+  M[Program, main] = [main, Block, EOF]
+
+Para Statement:
+  M[Statement, print] = [print, Expr, ;]
+  M[Statement, NUMBER] = [NUMBER, TermP, ExprP, ;]
+  M[Statement, var] = [var, IDENTIFIER, :, Type, VarInit]
+  M[Statement, (] = [(, Expr, ), TermP, ExprP, ;]
+  M[Statement, IDENTIFIER] = [IDENTIFIER, IdentRest]
+  M[Statement, while] = [while, Condition, Block]
+  M[Statement, if] = [if, Condition, Block, ElseOpt]
+  M[Statement, return] = [return, Expr, ;]
+
+Para ElseOpt:
+  M[ElseOpt, print] = [ε]
+  M[ElseOpt, NUMBER] = [ε]
+  M[ElseOpt, else] = [else, Block]
+  M[ElseOpt, var] = [ε]
+  M[ElseOpt, (] = [ε]
+  M[ElseOpt, IDENTIFIER] = [ε]
+  M[ElseOpt, while] = [ε]
+  M[ElseOpt, if] = [ε]
+  M[ElseOpt, }] = [ε]
+  M[ElseOpt, return] = [ε]
+
+Para LogicalOp:
+  M[LogicalOp, &&] = [&&]
+  M[LogicalOp, ||] = [||]
+
+Para IdentRest:
+  M[IdentRest, ==] = [TermP, ExprP, ;]
+  M[IdentRest, <=] = [TermP, ExprP, ;]
+  M[IdentRest, *] = [TermP, ExprP, ;]
+  M[IdentRest, +] = [TermP, ExprP, ;]
+  M[IdentRest, ;] = [TermP, ExprP, ;]
+  M[IdentRest, !=] = [TermP, ExprP, ;]
+  M[IdentRest, <] = [TermP, ExprP, ;]
+  M[IdentRest, =] = [=, Expr, ;]
+  M[IdentRest, -] = [TermP, ExprP, ;]
+  M[IdentRest, >] = [TermP, ExprP, ;]
+  M[IdentRest, /] = [TermP, ExprP, ;]
+  M[IdentRest, >=] = [TermP, ExprP, ;]
+
+Para Term:
+  M[Term, NUMBER] = [Factor, TermP]
+  M[Term, (] = [Factor, TermP]
+  M[Term, STRING] = [Factor, TermP]
+  M[Term, IDENTIFIER] = [Factor, TermP]
+
+Para TermP:
+  M[TermP, ==] = [ε]
+  M[TermP, &&] = [ε]
+  M[TermP, ||] = [ε]
+  M[TermP, <=] = [ε]
+  M[TermP, )] = [ε]
+  M[TermP, *] = [*, Factor, TermP]
+  M[TermP, +] = [ε]
+  M[TermP, -] = [ε]
+  M[TermP, /] = [/, Factor, TermP]
+  M[TermP, ;] = [ε]
+  M[TermP, !=] = [ε]
+  M[TermP, <] = [ε]
+  M[TermP, >] = [ε]
+  M[TermP, >=] = [ε]
+
+Para VarInit:
+  M[VarInit, ;] = [;]
+  M[VarInit, =] = [=, Expr, ;]
+
+Para Type:
+  M[Type, string] = [string]
+  M[Type, float] = [float]
+  M[Type, int] = [int]
+
+Para Expr:
+  M[Expr, NUMBER] = [Term, ExprP]
+  M[Expr, (] = [Term, ExprP]
+  M[Expr, STRING] = [Term, ExprP]
+  M[Expr, IDENTIFIER] = [Term, ExprP]
+
+Para CompOp:
+  M[CompOp, ==] = [==]
+  M[CompOp, <=] = [<=]
+  M[CompOp, !=] = [!=]
+  M[CompOp, <] = [<]
+  M[CompOp, >] = [>]
+  M[CompOp, >=] = [>=]
+
+Para Factor:
+  M[Factor, NUMBER] = [NUMBER]
+  M[Factor, (] = [(, Expr, )]
+  M[Factor, STRING] = [STRING]
+  M[Factor, IDENTIFIER] = [IDENTIFIER]
+
+Para Block:
+  M[Block, {] = [{, StmtList, }]
+
+Para StmtList:
+  M[StmtList, print] = [Statement, StmtList]
+  M[StmtList, NUMBER] = [Statement, StmtList]
+  M[StmtList, var] = [Statement, StmtList]
+  M[StmtList, (] = [Statement, StmtList]
+  M[StmtList, IDENTIFIER] = [Statement, StmtList]
+  M[StmtList, while] = [Statement, StmtList]
+  M[StmtList, if] = [Statement, StmtList]
+  M[StmtList, }] = [ε]
+  M[StmtList, return] = [Statement, StmtList]
+
+Para LogicalExpr:
+  M[LogicalExpr, NUMBER] = [Expr, LogicalOpTail]
+  M[LogicalExpr, (] = [Expr, LogicalOpTail]
+  M[LogicalExpr, STRING] = [Expr, LogicalOpTail]
+  M[LogicalExpr, IDENTIFIER] = [Expr, LogicalOpTail]
+
+Para ExprP:
+  M[ExprP, ==] = [CompOp, Term, ExprP]
+  M[ExprP, &&] = [ε]
+  M[ExprP, ||] = [ε]
+  M[ExprP, <=] = [CompOp, Term, ExprP]
+  M[ExprP, )] = [ε]
+  M[ExprP, +] = [+, Term, ExprP]
+  M[ExprP, ;] = [ε]
+  M[ExprP, !=] = [CompOp, Term, ExprP]
+  M[ExprP, <] = [CompOp, Term, ExprP]
+  M[ExprP, -] = [-, Term, ExprP]
+  M[ExprP, >] = [CompOp, Term, ExprP]
+  M[ExprP, >=] = [CompOp, Term, ExprP]
+
+============================================================
+TESTE COM TOKENS DO LEXER
+============================================================
+Entrada (tokens do arquivo lido):
+Tokens: 
+MAIN LEFT_BRACE VAR IDENTIFIER COLON INT EQUAL NUMBER SEMICOLON VAR IDENTIFIER COLON INT EQUAL NUMBER SEMICOLON VAR IDENTIFIER COLON STRING_KW EQUAL STRING SEMICOLON IF LEFT_PAREN IDENTIFIER GREATER IDENTIFIER AND_AND IDENTIFIER BANG_EQUAL NUMBER RIGHT_PAREN LEFT_BRACE IDENTIFIER EQUAL IDENTIFIER PLUS IDENTIFIER STAR NUMBER SEMICOLON RIGHT_BRACE ELSE LEFT_BRACE IDENTIFIER EQUAL NUMBER SEMICOLON RIGHT_BRACE WHILE LEFT_PAREN IDENTIFIER GREATER NUMBER RIGHT_PAREN LEFT_BRACE IDENTIFIER EQUAL IDENTIFIER MINUS NUMBER SEMICOLON RIGHT_BRACE RETURN IDENTIFIER SEMICOLON RIGHT_BRACE EOF 
+
+=== Iniciando Análise LL(1) com Pilha ===
+Passo 0: Pilha = [$, Program], Lookahead = main
+
+Passo 1:
+  Pilha: [$, Program]
+  Lookahead: main (main)
+  Produção: Program → [main, Block, EOF]
+
+Passo 2:
+  Pilha: [$, EOF, Block, main]
+  Lookahead: main (main)
+  MATCH: main
+
+Passo 3:
+  Pilha: [$, EOF, Block]
+  Lookahead: { ({)
+  Produção: Block → [{, StmtList, }]
+
+Passo 4:
+  Pilha: [$, EOF, }, StmtList, {]
+  Lookahead: { ({)
+  MATCH: {
+
+Passo 5:
+  Pilha: [$, EOF, }, StmtList]
+  Lookahead: var (var)
+  Produção: StmtList → [Statement, StmtList]
+
+Passo 6:
+  Pilha: [$, EOF, }, StmtList, Statement]
+  Lookahead: var (var)
+  Produção: Statement → [var, IDENTIFIER, :, Type, VarInit]
+
+Passo 7:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :, IDENTIFIER, var]
+  Lookahead: var (var)
+  MATCH: var
+
+Passo 8:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :, IDENTIFIER]
+  Lookahead: IDENTIFIER (x)
+  MATCH: IDENTIFIER
+
+Passo 9:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :]
+  Lookahead: : (:)
+  MATCH: :
+
+Passo 10:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type]
+  Lookahead: int (int)
+  Produção: Type → [int]
+
+Passo 11:
+  Pilha: [$, EOF, }, StmtList, VarInit, int]
+  Lookahead: int (int)
+  MATCH: int
+
+Passo 12:
+  Pilha: [$, EOF, }, StmtList, VarInit]
+  Lookahead: = (=)
+  Produção: VarInit → [=, Expr, ;]
+
+Passo 13:
+  Pilha: [$, EOF, }, StmtList, ;, Expr, =]
+  Lookahead: = (=)
+  MATCH: =
+
+Passo 14:
+  Pilha: [$, EOF, }, StmtList, ;, Expr]
+  Lookahead: NUMBER (10)
+  Produção: Expr → [Term, ExprP]
+
+Passo 15:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, Term]
+  Lookahead: NUMBER (10)
+  Produção: Term → [Factor, TermP]
+
+Passo 16:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: NUMBER (10)
+  Produção: Factor → [NUMBER]
+
+Passo 17:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, NUMBER]
+  Lookahead: NUMBER (10)
+  MATCH: NUMBER
+
+Passo 18:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP]
+  Lookahead: ; (;)
+  Produção: TermP → [ε]
+
+Passo 19:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP]
+  Lookahead: ; (;)
+  Produção: ExprP → [ε]
+
+Passo 20:
+  Pilha: [$, EOF, }, StmtList, ;]
+  Lookahead: ; (;)
+  MATCH: ;
+
+Passo 21:
+  Pilha: [$, EOF, }, StmtList]
+  Lookahead: var (var)
+  Produção: StmtList → [Statement, StmtList]
+
+Passo 22:
+  Pilha: [$, EOF, }, StmtList, Statement]
+  Lookahead: var (var)
+  Produção: Statement → [var, IDENTIFIER, :, Type, VarInit]
+
+Passo 23:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :, IDENTIFIER, var]
+  Lookahead: var (var)
+  MATCH: var
+
+Passo 24:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :, IDENTIFIER]
+  Lookahead: IDENTIFIER (y)
+  MATCH: IDENTIFIER
+
+Passo 25:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :]
+  Lookahead: : (:)
+  MATCH: :
+
+Passo 26:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type]
+  Lookahead: int (int)
+  Produção: Type → [int]
+
+Passo 27:
+  Pilha: [$, EOF, }, StmtList, VarInit, int]
+  Lookahead: int (int)
+  MATCH: int
+
+Passo 28:
+  Pilha: [$, EOF, }, StmtList, VarInit]
+  Lookahead: = (=)
+  Produção: VarInit → [=, Expr, ;]
+
+Passo 29:
+  Pilha: [$, EOF, }, StmtList, ;, Expr, =]
+  Lookahead: = (=)
+  MATCH: =
+
+Passo 30:
+  Pilha: [$, EOF, }, StmtList, ;, Expr]
+  Lookahead: NUMBER (2)
+  Produção: Expr → [Term, ExprP]
+
+Passo 31:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, Term]
+  Lookahead: NUMBER (2)
+  Produção: Term → [Factor, TermP]
+
+Passo 32:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: NUMBER (2)
+  Produção: Factor → [NUMBER]
+
+Passo 33:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, NUMBER]
+  Lookahead: NUMBER (2)
+  MATCH: NUMBER
+
+Passo 34:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP]
+  Lookahead: ; (;)
+  Produção: TermP → [ε]
+
+Passo 35:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP]
+  Lookahead: ; (;)
+  Produção: ExprP → [ε]
+
+Passo 36:
+  Pilha: [$, EOF, }, StmtList, ;]
+  Lookahead: ; (;)
+  MATCH: ;
+
+Passo 37:
+  Pilha: [$, EOF, }, StmtList]
+  Lookahead: var (var)
+  Produção: StmtList → [Statement, StmtList]
+
+Passo 38:
+  Pilha: [$, EOF, }, StmtList, Statement]
+  Lookahead: var (var)
+  Produção: Statement → [var, IDENTIFIER, :, Type, VarInit]
+
+Passo 39:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :, IDENTIFIER, var]
+  Lookahead: var (var)
+  MATCH: var
+
+Passo 40:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :, IDENTIFIER]
+  Lookahead: IDENTIFIER (msg)
+  MATCH: IDENTIFIER
+
+Passo 41:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :]
+  Lookahead: : (:)
+  MATCH: :
+
+Passo 42:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type]
+  Lookahead: string (string)
+  Produção: Type → [string]
+
+Passo 43:
+  Pilha: [$, EOF, }, StmtList, VarInit, string]
+  Lookahead: string (string)
+  MATCH: string
+
+Passo 44:
+  Pilha: [$, EOF, }, StmtList, VarInit]
+  Lookahead: = (=)
+  Produção: VarInit → [=, Expr, ;]
+
+Passo 45:
+  Pilha: [$, EOF, }, StmtList, ;, Expr, =]
+  Lookahead: = (=)
+  MATCH: =
+
+Passo 46:
+  Pilha: [$, EOF, }, StmtList, ;, Expr]
+  Lookahead: STRING ("hello")
+  Produção: Expr → [Term, ExprP]
+
+Passo 47:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, Term]
+  Lookahead: STRING ("hello")
+  Produção: Term → [Factor, TermP]
+
+Passo 48:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: STRING ("hello")
+  Produção: Factor → [STRING]
+
+Passo 49:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, STRING]
+  Lookahead: STRING ("hello")
+  MATCH: STRING
+
+Passo 50:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP]
+  Lookahead: ; (;)
+  Produção: TermP → [ε]
+
+Passo 51:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP]
+  Lookahead: ; (;)
+  Produção: ExprP → [ε]
+
+Passo 52:
+  Pilha: [$, EOF, }, StmtList, ;]
+  Lookahead: ; (;)
+  MATCH: ;
+
+Passo 53:
+  Pilha: [$, EOF, }, StmtList]
+  Lookahead: if (if)
+  Produção: StmtList → [Statement, StmtList]
+
+Passo 54:
+  Pilha: [$, EOF, }, StmtList, Statement]
+  Lookahead: if (if)
+  Produção: Statement → [if, Condition, Block, ElseOpt]
+
+Passo 55:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, Condition, if]
+  Lookahead: if (if)
+  MATCH: if
+
+Passo 56:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, Condition]
+  Lookahead: ( (()
+  Produção: Condition → [(, LogicalExpr, )]
+
+Passo 57:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalExpr, (]
+  Lookahead: ( (()
+  MATCH: (
+
+Passo 58:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalExpr]
+  Lookahead: IDENTIFIER (x)
+  Produção: LogicalExpr → [Expr, LogicalOpTail]
+
+Passo 59:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, Expr]
+  Lookahead: IDENTIFIER (x)
+  Produção: Expr → [Term, ExprP]
+
+Passo 60:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, Term]
+  Lookahead: IDENTIFIER (x)
+  Produção: Term → [Factor, TermP]
+
+Passo 61:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP, Factor]
+  Lookahead: IDENTIFIER (x)
+  Produção: Factor → [IDENTIFIER]
+
+Passo 62:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP, IDENTIFIER]
+  Lookahead: IDENTIFIER (x)
+  MATCH: IDENTIFIER
+
+Passo 63:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP]
+  Lookahead: > (>)
+  Produção: TermP → [ε]
+
+Passo 64:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP]
+  Lookahead: > (>)
+  Produção: ExprP → [CompOp, Term, ExprP]
+
+Passo 65:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, Term, CompOp]
+  Lookahead: > (>)
+  Produção: CompOp → [>]
+
+Passo 66:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, Term, >]
+  Lookahead: > (>)
+  MATCH: >
+
+Passo 67:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, Term]
+  Lookahead: IDENTIFIER (y)
+  Produção: Term → [Factor, TermP]
+
+Passo 68:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP, Factor]
+  Lookahead: IDENTIFIER (y)
+  Produção: Factor → [IDENTIFIER]
+
+Passo 69:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP, IDENTIFIER]
+  Lookahead: IDENTIFIER (y)
+  MATCH: IDENTIFIER
+
+Passo 70:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP]
+  Lookahead: && (&&)
+  Produção: TermP → [ε]
+
+Passo 71:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP]
+  Lookahead: && (&&)
+  Produção: ExprP → [ε]
+
+Passo 72:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail]
+  Lookahead: && (&&)
+  Produção: LogicalOpTail → [LogicalOp, Expr, LogicalOpTail]
+
+Passo 73:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, Expr, LogicalOp]
+  Lookahead: && (&&)
+  Produção: LogicalOp → [&&]
+
+Passo 74:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, Expr, &&]
+  Lookahead: && (&&)
+  MATCH: &&
+
+Passo 75:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, Expr]
+  Lookahead: IDENTIFIER (y)
+  Produção: Expr → [Term, ExprP]
+
+Passo 76:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, Term]
+  Lookahead: IDENTIFIER (y)
+  Produção: Term → [Factor, TermP]
+
+Passo 77:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP, Factor]
+  Lookahead: IDENTIFIER (y)
+  Produção: Factor → [IDENTIFIER]
+
+Passo 78:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP, IDENTIFIER]
+  Lookahead: IDENTIFIER (y)
+  MATCH: IDENTIFIER
+
+Passo 79:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP]
+  Lookahead: != (!=)
+  Produção: TermP → [ε]
+
+Passo 80:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP]
+  Lookahead: != (!=)
+  Produção: ExprP → [CompOp, Term, ExprP]
+
+Passo 81:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, Term, CompOp]
+  Lookahead: != (!=)
+  Produção: CompOp → [!=]
+
+Passo 82:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, Term, !=]
+  Lookahead: != (!=)
+  MATCH: !=
+
+Passo 83:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, Term]
+  Lookahead: NUMBER (0)
+  Produção: Term → [Factor, TermP]
+
+Passo 84:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP, Factor]
+  Lookahead: NUMBER (0)
+  Produção: Factor → [NUMBER]
+
+Passo 85:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP, NUMBER]
+  Lookahead: NUMBER (0)
+  MATCH: NUMBER
+
+Passo 86:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP, TermP]
+  Lookahead: ) ())
+  Produção: TermP → [ε]
+
+Passo 87:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail, ExprP]
+  Lookahead: ) ())
+  Produção: ExprP → [ε]
+
+Passo 88:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, ), LogicalOpTail]
+  Lookahead: ) ())
+  Produção: LogicalOpTail → [ε]
+
+Passo 89:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block, )]
+  Lookahead: ) ())
+  MATCH: )
+
+Passo 90:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, Block]
+  Lookahead: { ({)
+  Produção: Block → [{, StmtList, }]
+
+Passo 91:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, {]
+  Lookahead: { ({)
+  MATCH: {
+
+Passo 92:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList]
+  Lookahead: IDENTIFIER (x)
+  Produção: StmtList → [Statement, StmtList]
+
+Passo 93:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, Statement]
+  Lookahead: IDENTIFIER (x)
+  Produção: Statement → [IDENTIFIER, IdentRest]
+
+Passo 94:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, IdentRest, IDENTIFIER]
+  Lookahead: IDENTIFIER (x)
+  MATCH: IDENTIFIER
+
+Passo 95:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, IdentRest]
+  Lookahead: = (=)
+  Produção: IdentRest → [=, Expr, ;]
+
+Passo 96:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, Expr, =]
+  Lookahead: = (=)
+  MATCH: =
+
+Passo 97:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, Expr]
+  Lookahead: IDENTIFIER (x)
+  Produção: Expr → [Term, ExprP]
+
+Passo 98:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, Term]
+  Lookahead: IDENTIFIER (x)
+  Produção: Term → [Factor, TermP]
+
+Passo 99:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: IDENTIFIER (x)
+  Produção: Factor → [IDENTIFIER]
+
+Passo 100:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, TermP, IDENTIFIER]
+  Lookahead: IDENTIFIER (x)
+  MATCH: IDENTIFIER
+
+Passo 101:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, TermP]
+  Lookahead: + (+)
+  Produção: TermP → [ε]
+
+Passo 102:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP]
+  Lookahead: + (+)
+  Produção: ExprP → [+, Term, ExprP]
+
+Passo 103:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, Term, +]
+  Lookahead: + (+)
+  MATCH: +
+
+Passo 104:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, Term]
+  Lookahead: IDENTIFIER (y)
+  Produção: Term → [Factor, TermP]
+
+Passo 105:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: IDENTIFIER (y)
+  Produção: Factor → [IDENTIFIER]
+
+Passo 106:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, TermP, IDENTIFIER]
+  Lookahead: IDENTIFIER (y)
+  MATCH: IDENTIFIER
+
+Passo 107:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, TermP]
+  Lookahead: * (*)
+  Produção: TermP → [*, Factor, TermP]
+
+Passo 108:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, TermP, Factor, *]
+  Lookahead: * (*)
+  MATCH: *
+
+Passo 109:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: NUMBER (3)
+  Produção: Factor → [NUMBER]
+
+Passo 110:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, TermP, NUMBER]
+  Lookahead: NUMBER (3)
+  MATCH: NUMBER
+
+Passo 111:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP, TermP]
+  Lookahead: ; (;)
+  Produção: TermP → [ε]
+
+Passo 112:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;, ExprP]
+  Lookahead: ; (;)
+  Produção: ExprP → [ε]
+
+Passo 113:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList, ;]
+  Lookahead: ; (;)
+  MATCH: ;
+
+Passo 114:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }, StmtList]
+  Lookahead: } (})
+  Produção: StmtList → [ε]
+
+Passo 115:
+  Pilha: [$, EOF, }, StmtList, ElseOpt, }]
+  Lookahead: } (})
+  MATCH: }
+
+Passo 116:
+  Pilha: [$, EOF, }, StmtList, ElseOpt]
+  Lookahead: else (else)
+  Produção: ElseOpt → [else, Block]
+
+Passo 117:
+  Pilha: [$, EOF, }, StmtList, Block, else]
+  Lookahead: else (else)
+  MATCH: else
+
+Passo 118:
+  Pilha: [$, EOF, }, StmtList, Block]
+  Lookahead: { ({)
+  Produção: Block → [{, StmtList, }]
+
+Passo 119:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, {]
+  Lookahead: { ({)
+  MATCH: {
+
+Passo 120:
+  Pilha: [$, EOF, }, StmtList, }, StmtList]
+  Lookahead: IDENTIFIER (x)
+  Produção: StmtList → [Statement, StmtList]
+
+Passo 121:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, Statement]
+  Lookahead: IDENTIFIER (x)
+  Produção: Statement → [IDENTIFIER, IdentRest]
+
+Passo 122:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, IdentRest, IDENTIFIER]
+  Lookahead: IDENTIFIER (x)
+  MATCH: IDENTIFIER
+
+Passo 123:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, IdentRest]
+  Lookahead: = (=)
+  Produção: IdentRest → [=, Expr, ;]
+
+Passo 124:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, Expr, =]
+  Lookahead: = (=)
+  MATCH: =
+
+Passo 125:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, Expr]
+  Lookahead: NUMBER (0)
+  Produção: Expr → [Term, ExprP]
+
+Passo 126:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, Term]
+  Lookahead: NUMBER (0)
+  Produção: Term → [Factor, TermP]
+
+Passo 127:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: NUMBER (0)
+  Produção: Factor → [NUMBER]
+
+Passo 128:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, TermP, NUMBER]
+  Lookahead: NUMBER (0)
+  MATCH: NUMBER
+
+Passo 129:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, TermP]
+  Lookahead: ; (;)
+  Produção: TermP → [ε]
+
+Passo 130:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP]
+  Lookahead: ; (;)
+  Produção: ExprP → [ε]
+
+Passo 131:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;]
+  Lookahead: ; (;)
+  MATCH: ;
+
+Passo 132:
+  Pilha: [$, EOF, }, StmtList, }, StmtList]
+  Lookahead: } (})
+  Produção: StmtList → [ε]
+
+Passo 133:
+  Pilha: [$, EOF, }, StmtList, }]
+  Lookahead: } (})
+  MATCH: }
+
+Passo 134:
+  Pilha: [$, EOF, }, StmtList]
+  Lookahead: while (while)
+  Produção: StmtList → [Statement, StmtList]
+
+Passo 135:
+  Pilha: [$, EOF, }, StmtList, Statement]
+  Lookahead: while (while)
+  Produção: Statement → [while, Condition, Block]
+
+Passo 136:
+  Pilha: [$, EOF, }, StmtList, Block, Condition, while]
+  Lookahead: while (while)
+  MATCH: while
+
+Passo 137:
+  Pilha: [$, EOF, }, StmtList, Block, Condition]
+  Lookahead: ( (()
+  Produção: Condition → [(, LogicalExpr, )]
+
+Passo 138:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalExpr, (]
+  Lookahead: ( (()
+  MATCH: (
+
+Passo 139:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalExpr]
+  Lookahead: IDENTIFIER (x)
+  Produção: LogicalExpr → [Expr, LogicalOpTail]
+
+Passo 140:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, Expr]
+  Lookahead: IDENTIFIER (x)
+  Produção: Expr → [Term, ExprP]
+
+Passo 141:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP, Term]
+  Lookahead: IDENTIFIER (x)
+  Produção: Term → [Factor, TermP]
+
+Passo 142:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP, TermP, Factor]
+  Lookahead: IDENTIFIER (x)
+  Produção: Factor → [IDENTIFIER]
+
+Passo 143:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP, TermP, IDENTIFIER]
+  Lookahead: IDENTIFIER (x)
+  MATCH: IDENTIFIER
+
+Passo 144:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP, TermP]
+  Lookahead: > (>)
+  Produção: TermP → [ε]
+
+Passo 145:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP]
+  Lookahead: > (>)
+  Produção: ExprP → [CompOp, Term, ExprP]
+
+Passo 146:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP, Term, CompOp]
+  Lookahead: > (>)
+  Produção: CompOp → [>]
+
+Passo 147:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP, Term, >]
+  Lookahead: > (>)
+  MATCH: >
+
+Passo 148:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP, Term]
+  Lookahead: NUMBER (0)
+  Produção: Term → [Factor, TermP]
+
+Passo 149:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP, TermP, Factor]
+  Lookahead: NUMBER (0)
+  Produção: Factor → [NUMBER]
+
+Passo 150:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP, TermP, NUMBER]
+  Lookahead: NUMBER (0)
+  MATCH: NUMBER
+
+Passo 151:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP, TermP]
+  Lookahead: ) ())
+  Produção: TermP → [ε]
+
+Passo 152:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail, ExprP]
+  Lookahead: ) ())
+  Produção: ExprP → [ε]
+
+Passo 153:
+  Pilha: [$, EOF, }, StmtList, Block, ), LogicalOpTail]
+  Lookahead: ) ())
+  Produção: LogicalOpTail → [ε]
+
+Passo 154:
+  Pilha: [$, EOF, }, StmtList, Block, )]
+  Lookahead: ) ())
+  MATCH: )
+
+Passo 155:
+  Pilha: [$, EOF, }, StmtList, Block]
+  Lookahead: { ({)
+  Produção: Block → [{, StmtList, }]
+
+Passo 156:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, {]
+  Lookahead: { ({)
+  MATCH: {
+
+Passo 157:
+  Pilha: [$, EOF, }, StmtList, }, StmtList]
+  Lookahead: IDENTIFIER (x)
+  Produção: StmtList → [Statement, StmtList]
+
+Passo 158:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, Statement]
+  Lookahead: IDENTIFIER (x)
+  Produção: Statement → [IDENTIFIER, IdentRest]
+
+Passo 159:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, IdentRest, IDENTIFIER]
+  Lookahead: IDENTIFIER (x)
+  MATCH: IDENTIFIER
+
+Passo 160:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, IdentRest]
+  Lookahead: = (=)
+  Produção: IdentRest → [=, Expr, ;]
+
+Passo 161:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, Expr, =]
+  Lookahead: = (=)
+  MATCH: =
+
+Passo 162:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, Expr]
+  Lookahead: IDENTIFIER (x)
+  Produção: Expr → [Term, ExprP]
+
+Passo 163:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, Term]
+  Lookahead: IDENTIFIER (x)
+  Produção: Term → [Factor, TermP]
+
+Passo 164:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: IDENTIFIER (x)
+  Produção: Factor → [IDENTIFIER]
+
+Passo 165:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, TermP, IDENTIFIER]
+  Lookahead: IDENTIFIER (x)
+  MATCH: IDENTIFIER
+
+Passo 166:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, TermP]
+  Lookahead: - (-)
+  Produção: TermP → [ε]
+
+Passo 167:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP]
+  Lookahead: - (-)
+  Produção: ExprP → [-, Term, ExprP]
+
+Passo 168:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, Term, -]
+  Lookahead: - (-)
+  MATCH: -
+
+Passo 169:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, Term]
+  Lookahead: NUMBER (1)
+  Produção: Term → [Factor, TermP]
+
+Passo 170:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: NUMBER (1)
+  Produção: Factor → [NUMBER]
+
+Passo 171:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, TermP, NUMBER]
+  Lookahead: NUMBER (1)
+  MATCH: NUMBER
+
+Passo 172:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP, TermP]
+  Lookahead: ; (;)
+  Produção: TermP → [ε]
+
+Passo 173:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;, ExprP]
+  Lookahead: ; (;)
+  Produção: ExprP → [ε]
+
+Passo 174:
+  Pilha: [$, EOF, }, StmtList, }, StmtList, ;]
+  Lookahead: ; (;)
+  MATCH: ;
+
+Passo 175:
+  Pilha: [$, EOF, }, StmtList, }, StmtList]
+  Lookahead: } (})
+  Produção: StmtList → [ε]
+
+Passo 176:
+  Pilha: [$, EOF, }, StmtList, }]
+  Lookahead: } (})
+  MATCH: }
+
+Passo 177:
+  Pilha: [$, EOF, }, StmtList]
+  Lookahead: return (return)
+  Produção: StmtList → [Statement, StmtList]
+
+Passo 178:
+  Pilha: [$, EOF, }, StmtList, Statement]
+  Lookahead: return (return)
+  Produção: Statement → [return, Expr, ;]
+
+Passo 179:
+  Pilha: [$, EOF, }, StmtList, ;, Expr, return]
+  Lookahead: return (return)
+  MATCH: return
+
+Passo 180:
+  Pilha: [$, EOF, }, StmtList, ;, Expr]
+  Lookahead: IDENTIFIER (x)
+  Produção: Expr → [Term, ExprP]
+
+Passo 181:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, Term]
+  Lookahead: IDENTIFIER (x)
+  Produção: Term → [Factor, TermP]
+
+Passo 182:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: IDENTIFIER (x)
+  Produção: Factor → [IDENTIFIER]
+
+Passo 183:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, IDENTIFIER]
+  Lookahead: IDENTIFIER (x)
+  MATCH: IDENTIFIER
+
+Passo 184:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP]
+  Lookahead: ; (;)
+  Produção: TermP → [ε]
+
+Passo 185:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP]
+  Lookahead: ; (;)
+  Produção: ExprP → [ε]
+
+Passo 186:
+  Pilha: [$, EOF, }, StmtList, ;]
+  Lookahead: ; (;)
+  MATCH: ;
+
+Passo 187:
+  Pilha: [$, EOF, }, StmtList]
+  Lookahead: } (})
+  Produção: StmtList → [ε]
+
+Passo 188:
+  Pilha: [$, EOF, }]
+  Lookahead: } (})
+  MATCH: }
+
+Passo 189:
+  Pilha: [$, EOF]
+  Lookahead: EOF (<EOF>)
+  MATCH: EOF
+
+Passo 190:
+  Pilha: [$]
+  Lookahead: EOF (<EOF>)
+✅ Análise SUCESSO! String aceita.
+
+✅ Análise LL(1) com Pilha: ACEITA entrada lida
+
+Script done on 2025-12-09 19:37:35-03:00 [COMMAND_EXIT_CODE="0"]

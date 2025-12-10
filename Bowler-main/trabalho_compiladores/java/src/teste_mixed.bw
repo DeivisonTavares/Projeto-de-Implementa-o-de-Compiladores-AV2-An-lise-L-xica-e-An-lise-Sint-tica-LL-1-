@@ -1,0 +1,11 @@
+main {
+  var a: int = 1;
+  var b: int = 2;
+  if (a != 0) {
+    print(a + b);
+  }
+  while (b > 0) {
+    b = b - 1;
+    print(b);
+  }
+}

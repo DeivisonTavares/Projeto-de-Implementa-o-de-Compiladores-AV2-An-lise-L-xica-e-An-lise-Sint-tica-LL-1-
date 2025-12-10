@@ -1,0 +1,5 @@
+main {
+  var nome: string = "Alice";
+  var msg: string = "Hello";
+  print(msg);
+}

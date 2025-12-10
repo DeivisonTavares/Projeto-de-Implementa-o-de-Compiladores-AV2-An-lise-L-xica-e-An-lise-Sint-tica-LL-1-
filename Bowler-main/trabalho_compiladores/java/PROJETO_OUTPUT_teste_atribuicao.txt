@@ -1,0 +1,419 @@
+Script started on 2025-12-09 19:36:01-03:00 [TERM="xterm-256color" TTY="/dev/pts/1" COLUMNS="106" LINES="12"]
+=== Tabela de Tokens ===
+Lexema          Classe             Linha  Col   
+-------------------------------------------------------------
+main            MAIN               1      1     
+{               LEFT_BRACE         1      6     
+var             VAR                2      3     
+x               IDENTIFIER         2      7     
+:               COLON              2      8     
+int             INT                2      10    
+=               EQUAL              2      14    
+5               NUMBER             2      16    
+;               SEMICOLON          2      17    
+x               IDENTIFIER         3      3     
+=               EQUAL              3      5     
+5               NUMBER             3      7     
+;               SEMICOLON          3      8     
+}               RIGHT_BRACE        4      1     
+<EOF>           EOF                5      1     
+=== Cadeia de Tokens ===
+MAIN         LEFT_BRACE   VAR          IDENTIFIER   COLON        INT          EQUAL        NUMBER       
+SEMICOLON    IDENTIFIER   EQUAL        NUMBER       SEMICOLON    RIGHT_BRACE  EOF          
+
+✅ Parser Recursivo: Programa reconhecido sem erros.
+=== Árvore (impressão simplificada) ===
+Program
+  main:
+    Block {
+      VarDecl x:
+        Type(int)
+        init:
+          Literal(5)
+      ExprStmt
+        Assign x
+          Literal(5)
+    }
+=== Árvore (detalhada) ===
+Program(main:Block[VarDecl(name:x, type:int, init:Literal(5)), ExprStmt(Assign(x, Literal(5)))])
+
+============================================================
+ANÁLISE LL(1) COM PILHA - GRAMÁTICA SIMPLIFICADA
+============================================================
+
+Nota: A gramática LL(1) simplificada foi definida para
+validar a estrutura básica do programa Bowler.
+O Parser Recursivo acima reconheceu o programa com sucesso.
+
+=== Conjuntos FIRST ===
+FIRST(Condition) = [(]
+FIRST(LogicalOpTail) = [&&, ||, ε]
+FIRST(Program) = [main]
+FIRST(Statement) = [print, NUMBER, var, (, IDENTIFIER, while, if, return]
+FIRST(ElseOpt) = [ε, else]
+FIRST(LogicalOp) = [&&, ||]
+FIRST(IdentRest) = [==, <=, *, +, ;, !=, <, =, -, >, /, >=]
+FIRST(Term) = [NUMBER, (, STRING, IDENTIFIER]
+FIRST(TermP) = [ε, *, /]
+FIRST(VarInit) = [;, =]
+FIRST(Type) = [string, float, int]
+FIRST(Expr) = [NUMBER, (, STRING, IDENTIFIER]
+FIRST(CompOp) = [==, <=, !=, <, >, >=]
+FIRST(Factor) = [NUMBER, (, STRING, IDENTIFIER]
+FIRST(Block) = [{]
+FIRST(StmtList) = [print, NUMBER, ε, var, (, IDENTIFIER, while, if, return]
+FIRST(LogicalExpr) = [NUMBER, (, STRING, IDENTIFIER]
+FIRST(ExprP) = [==, <=, ε, +, !=, <, -, >, >=]
+
+=== Conjuntos FOLLOW ===
+FOLLOW(Condition) = [{]
+FOLLOW(LogicalOpTail) = [)]
+FOLLOW(Program) = [EOF]
+FOLLOW(Statement) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
+FOLLOW(ElseOpt) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
+FOLLOW(LogicalOp) = [NUMBER, (, STRING, IDENTIFIER]
+FOLLOW(IdentRest) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
+FOLLOW(Term) = [==, &&, ||, <=, ), +, -, ;, !=, <, >, >=]
+FOLLOW(TermP) = [==, &&, ||, <=, ), +, ;, !=, <, -, >, >=]
+FOLLOW(VarInit) = [print, NUMBER, var, (, IDENTIFIER, while, if, }, return]
+FOLLOW(Type) = [;, =]
+FOLLOW(Expr) = [&&, ||, ), ;]
+FOLLOW(CompOp) = [NUMBER, (, STRING, IDENTIFIER]
+FOLLOW(Factor) = [==, &&, ||, <=, ), *, +, -, /, ;, !=, <, >, >=]
+FOLLOW(Block) = [print, NUMBER, else, var, (, IDENTIFIER, while, EOF, if, }, return]
+FOLLOW(StmtList) = [}]
+FOLLOW(LogicalExpr) = [)]
+FOLLOW(ExprP) = [&&, ||, ), ;]
+
+=== Tabela de Análise LL(1) ===
+M[A, a] = Produção
+
+Para Condition:
+  M[Condition, (] = [(, LogicalExpr, )]
+
+Para LogicalOpTail:
+  M[LogicalOpTail, &&] = [LogicalOp, Expr, LogicalOpTail]
+  M[LogicalOpTail, ||] = [LogicalOp, Expr, LogicalOpTail]
+  M[LogicalOpTail, )] = [ε]
+
+Para Program:
+  M[Program, main] = [main, Block, EOF]
+
+Para Statement:
+  M[Statement, print] = [print, Expr, ;]
+  M[Statement, NUMBER] = [NUMBER, TermP, ExprP, ;]
+  M[Statement, var] = [var, IDENTIFIER, :, Type, VarInit]
+  M[Statement, (] = [(, Expr, ), TermP, ExprP, ;]
+  M[Statement, IDENTIFIER] = [IDENTIFIER, IdentRest]
+  M[Statement, while] = [while, Condition, Block]
+  M[Statement, if] = [if, Condition, Block, ElseOpt]
+  M[Statement, return] = [return, Expr, ;]
+
+Para ElseOpt:
+  M[ElseOpt, print] = [ε]
+  M[ElseOpt, NUMBER] = [ε]
+  M[ElseOpt, else] = [else, Block]
+  M[ElseOpt, var] = [ε]
+  M[ElseOpt, (] = [ε]
+  M[ElseOpt, IDENTIFIER] = [ε]
+  M[ElseOpt, while] = [ε]
+  M[ElseOpt, if] = [ε]
+  M[ElseOpt, }] = [ε]
+  M[ElseOpt, return] = [ε]
+
+Para LogicalOp:
+  M[LogicalOp, &&] = [&&]
+  M[LogicalOp, ||] = [||]
+
+Para IdentRest:
+  M[IdentRest, ==] = [TermP, ExprP, ;]
+  M[IdentRest, <=] = [TermP, ExprP, ;]
+  M[IdentRest, *] = [TermP, ExprP, ;]
+  M[IdentRest, +] = [TermP, ExprP, ;]
+  M[IdentRest, ;] = [TermP, ExprP, ;]
+  M[IdentRest, !=] = [TermP, ExprP, ;]
+  M[IdentRest, <] = [TermP, ExprP, ;]
+  M[IdentRest, =] = [=, Expr, ;]
+  M[IdentRest, -] = [TermP, ExprP, ;]
+  M[IdentRest, >] = [TermP, ExprP, ;]
+  M[IdentRest, /] = [TermP, ExprP, ;]
+  M[IdentRest, >=] = [TermP, ExprP, ;]
+
+Para Term:
+  M[Term, NUMBER] = [Factor, TermP]
+  M[Term, (] = [Factor, TermP]
+  M[Term, STRING] = [Factor, TermP]
+  M[Term, IDENTIFIER] = [Factor, TermP]
+
+Para TermP:
+  M[TermP, ==] = [ε]
+  M[TermP, &&] = [ε]
+  M[TermP, ||] = [ε]
+  M[TermP, <=] = [ε]
+  M[TermP, )] = [ε]
+  M[TermP, *] = [*, Factor, TermP]
+  M[TermP, +] = [ε]
+  M[TermP, -] = [ε]
+  M[TermP, /] = [/, Factor, TermP]
+  M[TermP, ;] = [ε]
+  M[TermP, !=] = [ε]
+  M[TermP, <] = [ε]
+  M[TermP, >] = [ε]
+  M[TermP, >=] = [ε]
+
+Para VarInit:
+  M[VarInit, ;] = [;]
+  M[VarInit, =] = [=, Expr, ;]
+
+Para Type:
+  M[Type, string] = [string]
+  M[Type, float] = [float]
+  M[Type, int] = [int]
+
+Para Expr:
+  M[Expr, NUMBER] = [Term, ExprP]
+  M[Expr, (] = [Term, ExprP]
+  M[Expr, STRING] = [Term, ExprP]
+  M[Expr, IDENTIFIER] = [Term, ExprP]
+
+Para CompOp:
+  M[CompOp, ==] = [==]
+  M[CompOp, <=] = [<=]
+  M[CompOp, !=] = [!=]
+  M[CompOp, <] = [<]
+  M[CompOp, >] = [>]
+  M[CompOp, >=] = [>=]
+
+Para Factor:
+  M[Factor, NUMBER] = [NUMBER]
+  M[Factor, (] = [(, Expr, )]
+  M[Factor, STRING] = [STRING]
+  M[Factor, IDENTIFIER] = [IDENTIFIER]
+
+Para Block:
+  M[Block, {] = [{, StmtList, }]
+
+Para StmtList:
+  M[StmtList, print] = [Statement, StmtList]
+  M[StmtList, NUMBER] = [Statement, StmtList]
+  M[StmtList, var] = [Statement, StmtList]
+  M[StmtList, (] = [Statement, StmtList]
+  M[StmtList, IDENTIFIER] = [Statement, StmtList]
+  M[StmtList, while] = [Statement, StmtList]
+  M[StmtList, if] = [Statement, StmtList]
+  M[StmtList, }] = [ε]
+  M[StmtList, return] = [Statement, StmtList]
+
+Para LogicalExpr:
+  M[LogicalExpr, NUMBER] = [Expr, LogicalOpTail]
+  M[LogicalExpr, (] = [Expr, LogicalOpTail]
+  M[LogicalExpr, STRING] = [Expr, LogicalOpTail]
+  M[LogicalExpr, IDENTIFIER] = [Expr, LogicalOpTail]
+
+Para ExprP:
+  M[ExprP, ==] = [CompOp, Term, ExprP]
+  M[ExprP, &&] = [ε]
+  M[ExprP, ||] = [ε]
+  M[ExprP, <=] = [CompOp, Term, ExprP]
+  M[ExprP, )] = [ε]
+  M[ExprP, +] = [+, Term, ExprP]
+  M[ExprP, ;] = [ε]
+  M[ExprP, !=] = [CompOp, Term, ExprP]
+  M[ExprP, <] = [CompOp, Term, ExprP]
+  M[ExprP, -] = [-, Term, ExprP]
+  M[ExprP, >] = [CompOp, Term, ExprP]
+  M[ExprP, >=] = [CompOp, Term, ExprP]
+
+============================================================
+TESTE COM TOKENS DO LEXER
+============================================================
+Entrada (tokens do arquivo lido):
+Tokens: 
+MAIN LEFT_BRACE VAR IDENTIFIER COLON INT EQUAL NUMBER SEMICOLON IDENTIFIER EQUAL NUMBER SEMICOLON RIGHT_BRACE EOF 
+
+=== Iniciando Análise LL(1) com Pilha ===
+Passo 0: Pilha = [$, Program], Lookahead = main
+
+Passo 1:
+  Pilha: [$, Program]
+  Lookahead: main (main)
+  Produção: Program → [main, Block, EOF]
+
+Passo 2:
+  Pilha: [$, EOF, Block, main]
+  Lookahead: main (main)
+  MATCH: main
+
+Passo 3:
+  Pilha: [$, EOF, Block]
+  Lookahead: { ({)
+  Produção: Block → [{, StmtList, }]
+
+Passo 4:
+  Pilha: [$, EOF, }, StmtList, {]
+  Lookahead: { ({)
+  MATCH: {
+
+Passo 5:
+  Pilha: [$, EOF, }, StmtList]
+  Lookahead: var (var)
+  Produção: StmtList → [Statement, StmtList]
+
+Passo 6:
+  Pilha: [$, EOF, }, StmtList, Statement]
+  Lookahead: var (var)
+  Produção: Statement → [var, IDENTIFIER, :, Type, VarInit]
+
+Passo 7:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :, IDENTIFIER, var]
+  Lookahead: var (var)
+  MATCH: var
+
+Passo 8:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :, IDENTIFIER]
+  Lookahead: IDENTIFIER (x)
+  MATCH: IDENTIFIER
+
+Passo 9:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type, :]
+  Lookahead: : (:)
+  MATCH: :
+
+Passo 10:
+  Pilha: [$, EOF, }, StmtList, VarInit, Type]
+  Lookahead: int (int)
+  Produção: Type → [int]
+
+Passo 11:
+  Pilha: [$, EOF, }, StmtList, VarInit, int]
+  Lookahead: int (int)
+  MATCH: int
+
+Passo 12:
+  Pilha: [$, EOF, }, StmtList, VarInit]
+  Lookahead: = (=)
+  Produção: VarInit → [=, Expr, ;]
+
+Passo 13:
+  Pilha: [$, EOF, }, StmtList, ;, Expr, =]
+  Lookahead: = (=)
+  MATCH: =
+
+Passo 14:
+  Pilha: [$, EOF, }, StmtList, ;, Expr]
+  Lookahead: NUMBER (5)
+  Produção: Expr → [Term, ExprP]
+
+Passo 15:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, Term]
+  Lookahead: NUMBER (5)
+  Produção: Term → [Factor, TermP]
+
+Passo 16:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: NUMBER (5)
+  Produção: Factor → [NUMBER]
+
+Passo 17:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, NUMBER]
+  Lookahead: NUMBER (5)
+  MATCH: NUMBER
+
+Passo 18:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP]
+  Lookahead: ; (;)
+  Produção: TermP → [ε]
+
+Passo 19:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP]
+  Lookahead: ; (;)
+  Produção: ExprP → [ε]
+
+Passo 20:
+  Pilha: [$, EOF, }, StmtList, ;]
+  Lookahead: ; (;)
+  MATCH: ;
+
+Passo 21:
+  Pilha: [$, EOF, }, StmtList]
+  Lookahead: IDENTIFIER (x)
+  Produção: StmtList → [Statement, StmtList]
+
+Passo 22:
+  Pilha: [$, EOF, }, StmtList, Statement]
+  Lookahead: IDENTIFIER (x)
+  Produção: Statement → [IDENTIFIER, IdentRest]
+
+Passo 23:
+  Pilha: [$, EOF, }, StmtList, IdentRest, IDENTIFIER]
+  Lookahead: IDENTIFIER (x)
+  MATCH: IDENTIFIER
+
+Passo 24:
+  Pilha: [$, EOF, }, StmtList, IdentRest]
+  Lookahead: = (=)
+  Produção: IdentRest → [=, Expr, ;]
+
+Passo 25:
+  Pilha: [$, EOF, }, StmtList, ;, Expr, =]
+  Lookahead: = (=)
+  MATCH: =
+
+Passo 26:
+  Pilha: [$, EOF, }, StmtList, ;, Expr]
+  Lookahead: NUMBER (5)
+  Produção: Expr → [Term, ExprP]
+
+Passo 27:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, Term]
+  Lookahead: NUMBER (5)
+  Produção: Term → [Factor, TermP]
+
+Passo 28:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, Factor]
+  Lookahead: NUMBER (5)
+  Produção: Factor → [NUMBER]
+
+Passo 29:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP, NUMBER]
+  Lookahead: NUMBER (5)
+  MATCH: NUMBER
+
+Passo 30:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP, TermP]
+  Lookahead: ; (;)
+  Produção: TermP → [ε]
+
+Passo 31:
+  Pilha: [$, EOF, }, StmtList, ;, ExprP]
+  Lookahead: ; (;)
+  Produção: ExprP → [ε]
+
+Passo 32:
+  Pilha: [$, EOF, }, StmtList, ;]
+  Lookahead: ; (;)
+  MATCH: ;
+
+Passo 33:
+  Pilha: [$, EOF, }, StmtList]
+  Lookahead: } (})
+  Produção: StmtList → [ε]
+
+Passo 34:
+  Pilha: [$, EOF, }]
+  Lookahead: } (})
+  MATCH: }
+
+Passo 35:
+  Pilha: [$, EOF]
+  Lookahead: EOF (<EOF>)
+  MATCH: EOF
+
+Passo 36:
+  Pilha: [$]
+  Lookahead: EOF (<EOF>)
+✅ Análise SUCESSO! String aceita.
+
+✅ Análise LL(1) com Pilha: ACEITA entrada lida
+
+Script done on 2025-12-09 19:36:01-03:00 [COMMAND_EXIT_CODE="0"]

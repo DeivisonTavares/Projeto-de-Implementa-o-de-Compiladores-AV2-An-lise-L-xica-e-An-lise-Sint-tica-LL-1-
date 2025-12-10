@@ -1,0 +1,6 @@
+main {
+  var x: int = 10;
+  while (x) {
+    x = x - 1;
+  }
+}

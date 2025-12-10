@@ -1,0 +1,6 @@
+main {
+  var x: int = 5;
+  if (x) {
+    x = x + 1;
+  }
+}

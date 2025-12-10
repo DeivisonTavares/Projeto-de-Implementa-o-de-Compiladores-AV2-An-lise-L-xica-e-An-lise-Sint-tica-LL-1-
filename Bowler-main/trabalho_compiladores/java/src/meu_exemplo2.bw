@@ -1,0 +1,17 @@
+main {
+    var nome: string = input("Nome: ");
+    var idade: int = 20;
+    var notas: float[] = [7.5, 8.0, 9.2];
+    for (var i: int = 0; i < 3; i += 1) {
+        print("Nota " + i + ": " + notas[i]);
+    }
+    var media: float = (notas[0] + notas[1] + notas[2]) / 3.0;
+    print("Média: " + media);
+    print("Situação: " + (media >= 7.0 ? "Aprovado" : "Reprovado"));
+    switch (idade) {
+        case 18: { print("Maior de idade!"); }
+        case 20: { print("Tem 20 anos!"); }
+        default: { print("Idade diferente."); }
+    }
+    print("Bem-vindo, ${nome}!");
+}

@@ -1,0 +1,16 @@
+main {
+  var a: int = 5;
+  var b: int = 3;
+  if (a > b) {
+    print(a);
+  }
+  if (a < b) {
+    print(b);
+  }
+  if (a == b) {
+    print(0);
+  }
+  if (a != b) {
+    print(1);
+  }
+}

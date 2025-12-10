@@ -1,0 +1,10 @@
+main {
+  var x: int = 10;
+  var y: int = 2;
+  if (x > y && y != 0) {
+    print(1);
+  }
+  if (x < y || y == 2) {
+    print(2);
+  }
+}
